@@ -1,18 +1,18 @@
-use std::collections::{HashMap, HashSet};
 use super::world::{ComponentStorage, EntityId, World};
-use crate::engine::render::{Position as RenderPosition};
+use crate::engine::render::Position as RenderPosition;
+use std::collections::{HashMap, HashSet};
 
 pub trait Component {}
 
 pub struct Position {
     pub x: f32,
     pub y: f32,
-    pub position_type: PositionType
+    pub position_type: PositionType,
 }
 #[derive(PartialEq)]
 pub enum PositionType {
     Abs,
-    Rel
+    Rel,
 }
 impl Component for Position {}
 impl ComponentStorage<Position> for World {
@@ -32,7 +32,7 @@ impl ComponentStorage<Position> for World {
 }
 
 pub struct Rotation {
-    pub x: u16
+    pub x: u16,
 }
 impl Component for Rotation {}
 impl ComponentStorage<Rotation> for World {
@@ -43,17 +43,17 @@ impl ComponentStorage<Rotation> for World {
     }
 
     fn fetch(&self, entity_id: EntityId) -> Option<&Rotation> {
-        todo!()
+        self.rotation.get(&entity_id)
     }
 
     fn get_mut(&mut self, entity_id: EntityId) -> Option<&mut Rotation> {
-        todo!()
+        self.rotation.get_mut(&entity_id)
     }
 }
 
 pub struct Collider {
     pub offset: (isize, isize),
-    pub size: (usize, usize)
+    pub size: (usize, usize),
 }
 impl Component for Collider {}
 impl ComponentStorage<Collider> for World {
@@ -72,46 +72,47 @@ impl ComponentStorage<Collider> for World {
     }
 }
 enum ColliderShape {
-    Rectangle { width: usize, height: usize }
+    Rectangle { width: usize, height: usize },
 }
 
 impl Collider {
     pub fn get_points(&self, entity_pos: RenderPosition) -> (RenderPosition, RenderPosition) {
         let collider_position = (
             entity_pos.0.wrapping_add_signed(self.offset.0),
-            entity_pos.1.wrapping_add_signed(self.offset.1)
+            entity_pos.1.wrapping_add_signed(self.offset.1),
         );
 
         (
             (collider_position.0, collider_position.1),
-            (collider_position.0 + self.size.0, collider_position.1 + self.size.1)
+            (
+                collider_position.0 + self.size.0,
+                collider_position.1 + self.size.1,
+            ),
         )
     }
 }
 
 #[derive(Default, Debug)]
 pub struct CollisionInfo {
-    pub collision: HashMap<EntityId, Collision>
+    pub collision: HashMap<EntityId, Collision>,
 }
 
 impl CollisionInfo {
     pub fn add_collision(&mut self, entity_id: EntityId, collision_sides: HashSet<CollisionSide>) {
-        self.collision.insert(entity_id, Collision::new(entity_id, collision_sides));
+        self.collision
+            .insert(entity_id, Collision::new(entity_id, collision_sides));
     }
 }
 
 #[derive(Default, Debug)]
 pub struct Collision {
     pub entity_id: EntityId,
-    pub sides: HashSet<CollisionSide>
+    pub sides: HashSet<CollisionSide>,
 }
 
 impl Collision {
     pub fn new(entity_id: EntityId, sides: HashSet<CollisionSide>) -> Self {
-        Self {
-            entity_id,
-            sides
-        }
+        Self { entity_id, sides }
     }
 }
 
@@ -121,12 +122,12 @@ pub enum CollisionSide {
     Right(usize),
     Top(usize),
     Bottom(usize),
-    Contained { x: usize, y: usize }
+    Contained { x: usize, y: usize },
 }
 
 #[derive(Default)]
 pub struct Children {
-    entities: Vec<EntityId>
+    entities: HashSet<EntityId>,
 }
 impl Component for Children {}
 impl ComponentStorage<Children> for World {
@@ -145,17 +146,17 @@ impl ComponentStorage<Children> for World {
     }
 }
 impl Children {
-    pub fn entities(&self) -> &Vec<EntityId> {
+    pub fn entities(&self) -> &HashSet<EntityId> {
         &self.entities
     }
 
     pub fn add_entity(&mut self, entity_id: EntityId) {
-        self.entities.push(entity_id);
+        self.entities.insert(entity_id);
     }
 }
 
 pub struct Parent {
-    pub entity: EntityId
+    pub entity: EntityId,
 }
 impl Component for Parent {}
 impl ComponentStorage<Parent> for World {
@@ -176,7 +177,7 @@ impl ComponentStorage<Parent> for World {
 
 pub struct Size {
     pub x: usize,
-    pub y: usize
+    pub y: usize,
 }
 
 impl Component for Size {}

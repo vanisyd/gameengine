@@ -1,20 +1,24 @@
-use crate::engine::render::{Color, Point, Position, Size};
-use super::triangle::Triangle;
 use super::rect::Rectangle;
+use super::triangle::Triangle;
+use crate::engine::render::{Color, Point, Position, Size};
 
 pub struct Renderer {
     buffer: Vec<u32>,
     width: usize,
-    height: usize
+    height: usize,
 }
 
-pub struct Line { start: Point, end: Point, color: Color }
+pub struct Line {
+    start: Point,
+    end: Point,
+    color: Color,
+}
 impl Default for Line {
     fn default() -> Self {
         Self {
             start: (0, 0),
             end: (0, 0),
-            color: Renderer::rgb_to_u32(255, 255, 255)
+            color: Renderer::rgb_to_u32(255, 255, 255),
         }
     }
 }
@@ -24,7 +28,7 @@ impl Renderer {
         Self {
             buffer,
             width: width as usize,
-            height: height as usize
+            height: height as usize,
         }
     }
 
@@ -54,23 +58,15 @@ impl Renderer {
         if dy <= dx {
             delta_1 = 2 * dy;
             delta_2 = 2 * (dy - dx);
-            delta = (2*dy - dx);
+            delta = (2 * dy - dx);
         } else {
-            delta_1 = 2*dx;
+            delta_1 = 2 * dx;
             delta_2 = 2 * (dx - dy);
-            delta = (2*dx - dy);
+            delta = (2 * dx - dy);
         }
 
-        let step_x: isize = if end.0 > start.0 {
-            1
-        } else {
-            -1
-        };
-        let step_y: isize = if end.1 > start.1 {
-            1
-        } else {
-            -1
-        };
+        let step_x: isize = if end.0 > start.0 { 1 } else { -1 };
+        let step_y: isize = if end.1 > start.1 { 1 } else { -1 };
 
         let mut x = start.0;
         let mut y = start.1;
