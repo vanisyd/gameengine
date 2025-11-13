@@ -12,8 +12,8 @@ pub trait Entity {
 
 pub trait ComponentStorage<T: Component> {
     fn add_component(&mut self, entity_id: EntityId, component: T) -> &mut Self;
-    fn fetch(&self, entity_id: EntityId) -> Option<&T>;
-    fn get_mut(&mut self, entity_id: EntityId) -> Option<&mut T>;
+    fn fetch(&self, entity_id: &EntityId) -> Option<&T>;
+    fn get_mut(&mut self, entity_id: &EntityId) -> Option<&mut T>;
 }
 
 pub struct World {
@@ -46,14 +46,14 @@ impl World {
         entity_id
     }
 
-    pub fn fetch<T: Component>(&self, id: EntityId) -> Option<&T>
+    pub fn fetch<T: Component>(&self, id: &EntityId) -> Option<&T>
     where
         Self: ComponentStorage<T>,
     {
         <Self as ComponentStorage<T>>::fetch(self, id)
     }
 
-    pub fn get_mut<T: Component>(&mut self, id: EntityId) -> Option<&mut T>
+    pub fn get_mut<T: Component>(&mut self, id: &EntityId) -> Option<&mut T>
     where
         Self: ComponentStorage<T>,
     {

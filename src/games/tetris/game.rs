@@ -173,7 +173,7 @@ impl TetrisGame {
                     }
                 }
             }
-            if can_fall && let Some(pos) = world.get_mut::<PositionComponent>(tetromino.get_id()) {
+            if can_fall && let Some(pos) = world.get_mut::<PositionComponent>(&tetromino.get_id()) {
                 pos.y += BLOCK_SIZE as f32;
             }
         }
@@ -267,7 +267,7 @@ impl TetrisGame {
             }
 
             for line_block in line.into_iter() {
-                let parent = world.fetch::<Parent>(*line_block).unwrap();
+                let parent = world.fetch::<Parent>(line_block).unwrap();
                 let tetromino = self.landed_tetrominos.get_mut(&parent.entity).unwrap();
                 tetromino.remove_block(*line_block, world).unwrap();
             }

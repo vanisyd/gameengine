@@ -22,12 +22,12 @@ impl ComponentStorage<Position> for World {
         self
     }
 
-    fn fetch(&self, entity_id: EntityId) -> Option<&Position> {
-        self.positions.get(&entity_id)
+    fn fetch(&self, entity_id: &EntityId) -> Option<&Position> {
+        self.positions.get(entity_id)
     }
 
-    fn get_mut(&mut self, entity_id: EntityId) -> Option<&mut Position> {
-        self.positions.get_mut(&entity_id)
+    fn get_mut(&mut self, entity_id: &EntityId) -> Option<&mut Position> {
+        self.positions.get_mut(entity_id)
     }
 }
 
@@ -42,11 +42,11 @@ impl ComponentStorage<Rotation> for World {
         self
     }
 
-    fn fetch(&self, entity_id: EntityId) -> Option<&Rotation> {
+    fn fetch(&self, entity_id: &EntityId) -> Option<&Rotation> {
         self.rotation.get(&entity_id)
     }
 
-    fn get_mut(&mut self, entity_id: EntityId) -> Option<&mut Rotation> {
+    fn get_mut(&mut self, entity_id: &EntityId) -> Option<&mut Rotation> {
         self.rotation.get_mut(&entity_id)
     }
 }
@@ -63,12 +63,12 @@ impl ComponentStorage<Collider> for World {
         self
     }
 
-    fn fetch(&self, entity_id: EntityId) -> Option<&Collider> {
-        self.colliders.get(&entity_id)
+    fn fetch(&self, entity_id: &EntityId) -> Option<&Collider> {
+        self.colliders.get(entity_id)
     }
 
-    fn get_mut(&mut self, entity_id: EntityId) -> Option<&mut Collider> {
-        self.colliders.get_mut(&entity_id)
+    fn get_mut(&mut self, entity_id: &EntityId) -> Option<&mut Collider> {
+        self.colliders.get_mut(entity_id)
     }
 }
 enum ColliderShape {
@@ -137,12 +137,12 @@ impl ComponentStorage<Children> for World {
         self
     }
 
-    fn fetch(&self, entity_id: EntityId) -> Option<&Children> {
-        self.children.get(&entity_id)
+    fn fetch(&self, entity_id: &EntityId) -> Option<&Children> {
+        self.children.get(entity_id)
     }
 
-    fn get_mut(&mut self, entity_id: EntityId) -> Option<&mut Children> {
-        self.children.get_mut(&entity_id)
+    fn get_mut(&mut self, entity_id: &EntityId) -> Option<&mut Children> {
+        self.children.get_mut(entity_id)
     }
 }
 impl Children {
@@ -166,12 +166,12 @@ impl ComponentStorage<Parent> for World {
         self
     }
 
-    fn fetch(&self, entity_id: EntityId) -> Option<&Parent> {
-        self.parent.get(&entity_id)
+    fn fetch(&self, entity_id: &EntityId) -> Option<&Parent> {
+        self.parent.get(entity_id)
     }
 
-    fn get_mut(&mut self, entity_id: EntityId) -> Option<&mut Parent> {
-        self.parent.get_mut(&entity_id)
+    fn get_mut(&mut self, entity_id: &EntityId) -> Option<&mut Parent> {
+        self.parent.get_mut(entity_id)
     }
 }
 
@@ -188,11 +188,11 @@ impl ComponentStorage<Size> for World {
         self
     }
 
-    fn fetch(&self, entity_id: EntityId) -> Option<&Size> {
-        todo!()
+    fn fetch(&self, entity_id: &EntityId) -> Option<&Size> {
+        self.sizes.get(entity_id)
     }
 
-    fn get_mut(&mut self, entity_id: EntityId) -> Option<&mut Size> {
-        todo!()
+    fn get_mut(&mut self, entity_id: &EntityId) -> Option<&mut Size> {
+        self.sizes.get_mut(entity_id)
     }
 }

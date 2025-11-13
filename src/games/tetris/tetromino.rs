@@ -163,7 +163,7 @@ impl Tetromino {
     }
 
     pub fn shift(&mut self, world: &mut World, move_direction: MoveDirection, speed: f32) {
-        let pos = world.get_mut::<PositionComponent>(self.entity_id).unwrap();
+        let pos = world.get_mut::<PositionComponent>(&self.entity_id).unwrap();
 
         match move_direction {
             MoveDirection::Right => pos.x += speed,
@@ -189,8 +189,8 @@ impl Tetromino {
     }
 
     pub fn rotate(&self, world: &mut World) {
-        let pos = world.fetch::<PositionComponent>(self.entity_id).unwrap();
-        let rotation = world.fetch::<RotationComponent>(self.entity_id).unwrap();
+        let pos = world.fetch::<PositionComponent>(&self.entity_id).unwrap();
+        let rotation = world.fetch::<RotationComponent>(&self.entity_id).unwrap();
     }
 
     /** Builder **/
