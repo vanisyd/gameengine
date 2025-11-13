@@ -71,7 +71,7 @@ impl Tetromino {
             );
 
         let mut rng = rand::rng();
-        let mut n: u8 = rng.random_range(0..4);
+        let mut n: u8 = rng.random_range(0..5);
         let tetromino_type = TetrominoType::get_by_index(n);
         let color_code: usize = rng.random_range(0..3);
 
