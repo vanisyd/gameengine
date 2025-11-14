@@ -123,12 +123,6 @@ impl Tetromino {
                 x: width * BLOCK_SIZE,
                 y: height * BLOCK_SIZE,
             },
-        ).add_component(
-            self.entity_id,
-            Collider {
-                offset: (0, -1),
-                size: (width, height + 1)
-            }
         );
     }
 
