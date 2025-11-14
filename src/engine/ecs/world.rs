@@ -105,10 +105,10 @@ impl World {
                 let ((other_min_x, other_min_y), (other_max_x, other_max_y)) =
                     other_collider.get_points(other_pos?);
 
-                if !(max_x <= other_min_x
+                if !(max_x < other_min_x
                     || min_x > other_max_x
-                    || max_y <= other_min_y
-                    || min_y >= other_max_y)
+                    || max_y < other_min_y
+                    || min_y > other_max_y)
                 {
                     let overlap_x =
                         (max_x.min(other_max_x)) as isize - (min_x.max(other_min_x)) as isize;

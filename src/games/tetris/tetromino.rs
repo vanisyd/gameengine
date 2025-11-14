@@ -47,6 +47,10 @@ pub enum MoveDirection {
     Left,
     Down,
 }
+pub enum RotateDirection {
+    Left,
+    Right
+}
 
 #[derive(Clone)]
 pub struct Tetromino {
@@ -72,6 +76,7 @@ impl Tetromino {
 
         let mut rng = rand::rng();
         let mut n: u8 = rng.random_range(0..5);
+        // n = 4;
         let tetromino_type = TetrominoType::get_by_index(n);
         let color_code: usize = rng.random_range(0..3);
 
@@ -118,6 +123,12 @@ impl Tetromino {
                 x: width * BLOCK_SIZE,
                 y: height * BLOCK_SIZE,
             },
+        ).add_component(
+            self.entity_id,
+            Collider {
+                offset: (0, -1),
+                size: (width, height + 1)
+            }
         );
     }
 
@@ -188,7 +199,7 @@ impl Tetromino {
         }
     }
 
-    pub fn rotate(&self, world: &mut World) {
+    pub fn rotate(&self, world: &mut World, rotate_direction: RotateDirection) {
         let pos = world.fetch::<PositionComponent>(&self.entity_id).unwrap();
         let rotation = world.fetch::<RotationComponent>(&self.entity_id).unwrap();
     }

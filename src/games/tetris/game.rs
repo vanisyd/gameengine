@@ -148,8 +148,8 @@ impl TetrisGame {
         }
     }
 
-    fn push_landed_tetrominos(&self, world: &mut World) {
-        for (_, tetromino) in &self.landed_tetrominos {
+    fn push_landed_tetrominos(&mut self, world: &mut World) {
+        for (_, tetromino) in &mut self.landed_tetrominos {
             let block_ids: Vec<EntityId> = tetromino
                 .blocks
                 .iter()
@@ -173,8 +173,8 @@ impl TetrisGame {
                     }
                 }
             }
-            if can_fall && let Some(pos) = world.get_mut::<PositionComponent>(&tetromino.get_id()) {
-                pos.y += BLOCK_SIZE as f32;
+            if can_fall {
+                tetromino.shift(world, MoveDirection::Down, BLOCK_SIZE as f32);
             }
         }
     }
@@ -209,14 +209,14 @@ impl TetrisGame {
                             }
                         }
                         CollisionSide::Bottom(depth) => {
-                            info!("Move down. Bottom collision: {depth}");
+                            // info!("Move down. Bottom collision: {depth}");
                             self.landed_tetrominos
                                 .insert(tetromino.get_id(), tetromino.clone());
                             self.current_tetromino = None;
                             return;
                         }
                         CollisionSide::Contained { x, y } => {
-                            info!("Contained: {x}, {y}");
+                            // info!("Contained: {x}, {y}");
                         }
                         _ => {}
                     }
