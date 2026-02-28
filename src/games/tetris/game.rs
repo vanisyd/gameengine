@@ -1,5 +1,5 @@
 use super::BLOCK_SIZE;
-use super::tetromino::{MoveDirection, Tetromino};
+use super::tetromino::{MoveDirection, RotateDirection, Tetromino};
 use crate::engine::ecs::component::{
     Children, Collider, CollisionSide, Parent, Position as PositionComponent, PositionType, Size,
 };
@@ -77,6 +77,7 @@ pub struct TetrisGame {
     current_tetromino: Option<Tetromino>,
     landed_tetrominos: HashMap<EntityId, Tetromino>,
     timer: f32,
+    paused: bool
 }
 
 impl Game for TetrisGame {
@@ -85,6 +86,16 @@ impl Game for TetrisGame {
 
         if self.board.is_none() {
             self.board = Some(Board::new(world));
+        }
+
+        if input_state.is_pressed(&KeyCode::KeyP) {
+            self.paused = !self.paused;
+        }
+
+        self.debug(world, input_state, &delta_time);
+
+        if self.paused {
+            return
         }
 
         self.handle_lines(world);
@@ -102,11 +113,11 @@ impl Game for TetrisGame {
         }
 
         let move_direction: Option<MoveDirection> = {
-            if input_state.keys_pressed.get(&KeyCode::ArrowRight).is_some() {
+            if input_state.is_pressed(&KeyCode::ArrowRight) {
                 Some(MoveDirection::Right)
-            } else if input_state.keys_pressed.get(&KeyCode::ArrowLeft).is_some() {
+            } else if input_state.is_pressed(&KeyCode::ArrowLeft) {
                 Some(MoveDirection::Left)
-            } else if input_state.keys_pressed.get(&KeyCode::ArrowDown).is_some() {
+            } else if input_state.is_pressed(&KeyCode::ArrowDown) {
                 Some(MoveDirection::Down)
             } else {
                 None
@@ -120,6 +131,12 @@ impl Game for TetrisGame {
         if self.timer >= 0.5 && self.current_tetromino.is_some() {
             self.timer = 0.0;
             self.move_tetromino(world, MoveDirection::Down, BLOCK_SIZE as f32);
+        }
+
+        if input_state.is_pressed(&KeyCode::Space) {
+            if let Some(tetromino) = self.current_tetromino.as_mut() {
+                tetromino.rotate(world, RotateDirection::Left);
+            }
         }
     }
 
@@ -145,6 +162,7 @@ impl TetrisGame {
             current_tetromino: None,
             landed_tetrominos: HashMap::new(),
             timer: 0.0,
+            paused: false
         }
     }
 
@@ -198,13 +216,13 @@ impl TetrisGame {
                     match collision_side {
                         CollisionSide::Left(depth) => {
                             if matches!(move_direction, MoveDirection::Left) {
-                                info!("Collision left: {depth}");
+                                // info!("Collision left: {depth}");
                                 return;
                             }
                         }
                         CollisionSide::Right(depth) => {
                             if matches!(move_direction, MoveDirection::Right) {
-                                info!("Collision right: {depth}");
+                                // info!("Collision right: {depth}");
                                 return;
                             }
                         }
@@ -230,7 +248,7 @@ impl TetrisGame {
     fn refresh_cells(&mut self, world: &mut World) {
         let board = self.board.as_mut().unwrap();
         board.cells.fill(0);
-
+        
         for (_, tetromino) in &self.landed_tetrominos {
             let tetromino_pos = world.positions.get(&tetromino.get_id()).unwrap();
             let (tetromino_x, tetromino_y) = (
@@ -245,7 +263,23 @@ impl TetrisGame {
             let tetromino_cell = tetromino_row + tetromino_x;
 
             for block in &tetromino.blocks {
-                let block_pos = block.get_shape().get_position();
+                let shape_pos = world.fetch::<PositionComponent>(&block.get_id())
+                    .unwrap();
+                let block_pos: (usize, usize) = {
+                    let x = if shape_pos.x as usize > 0 {
+                        shape_pos.x as usize / BLOCK_SIZE
+                    } else {
+                        shape_pos.x as usize
+                    };
+
+                    let y = if shape_pos.y as usize > 0 {
+                        shape_pos.y as usize / BLOCK_SIZE
+                    } else {
+                        shape_pos.y as usize
+                    };
+
+                    (x, y)
+                };
                 let block_row = if block_pos.1 > 0 {
                     block_pos.1 * BOARD_CELLS
                 } else {
@@ -273,6 +307,27 @@ impl TetrisGame {
             }
 
             line.fill(0);
+        }
+    }
+
+    fn debug(&mut self, world: &mut World, input_state: &InputState, delta_time: &f32) {
+        if !self.paused {
+            return
+        }
+
+        let cursor_x: f32 = input_state.mouse_pos.0 as f32;
+        let cursor_y: f32 = input_state.mouse_pos.1 as f32;
+
+        let mut nearest: Vec<(EntityId, f32)> = world.positions.iter()
+            .map(|(&id, pos)| {
+                let dx = pos.x - cursor_x;
+                let dy = pos.y - cursor_y;
+                (id, dx * dx + dy * dy)
+            }).collect();
+        nearest
+            .sort_unstable_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+        for entity_id in &nearest[0..1] {
+            
         }
     }
 }

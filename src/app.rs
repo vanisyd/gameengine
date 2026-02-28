@@ -1,17 +1,17 @@
+use crate::engine::ecs::world::World;
+use crate::engine::game::Game;
+use crate::engine::input::InputState;
+use crate::engine::render::renderer::Renderer;
+use crate::{WIN_HEIGHT, WIN_WIDTH};
+use softbuffer::{Context, Surface};
 use std::rc::Rc;
 use std::time::Instant;
-use softbuffer::{Context, Surface};
 use winit::application::ApplicationHandler;
 use winit::dpi::PhysicalSize;
 use winit::event::{ElementState, WindowEvent};
-use winit::event_loop::{ActiveEventLoop};
+use winit::event_loop::ActiveEventLoop;
 use winit::keyboard::PhysicalKey;
 use winit::window::{Window, WindowAttributes, WindowButtons, WindowId};
-use crate::engine::game::Game;
-use crate::{WIN_HEIGHT, WIN_WIDTH};
-use crate::engine::ecs::world::World;
-use crate::engine::input::InputState;
-use crate::engine::render::renderer::Renderer;
 
 #[derive(Default)]
 pub struct App {
@@ -21,7 +21,7 @@ pub struct App {
     last_update: Option<Instant>,
     renderer: Option<Renderer>,
     input_state: InputState,
-    pub world: Option<World>
+    pub world: Option<World>,
 }
 
 impl ApplicationHandler for App {
@@ -33,8 +33,7 @@ impl ApplicationHandler for App {
             .with_enabled_buttons(WindowButtons::CLOSE);
 
         let window = Rc::new(event_loop.create_window(window_attrs).unwrap());
-        let context = Context::new(window.clone())
-            .unwrap();
+        let context = Context::new(window.clone()).unwrap();
         let surface = Surface::new(&context, window.clone()).unwrap();
 
         self.window = Some(window);
@@ -47,13 +46,18 @@ impl ApplicationHandler for App {
         self.renderer = Some(Renderer::new(render_buffer, WIN_WIDTH, WIN_HEIGHT));
     }
 
-    fn window_event(&mut self, event_loop: &ActiveEventLoop, _window_id: WindowId, event: WindowEvent) {
+    fn window_event(
+        &mut self,
+        event_loop: &ActiveEventLoop,
+        _window_id: WindowId,
+        event: WindowEvent,
+    ) {
         let surface = self.surface.as_mut().unwrap();
 
         match event {
             WindowEvent::CloseRequested => {
                 event_loop.exit();
-            },
+            }
             WindowEvent::RedrawRequested => {
                 let now = Instant::now();
                 let delta_time = if let Some(last_update) = self.last_update {
@@ -68,8 +72,7 @@ impl ApplicationHandler for App {
                 // Update
                 if let Some(game) = &mut self.game {
                     game.update(delta_time, &self.input_state, world);
-                    self.input_state.keys_pressed.clear();
-                    self.input_state.keys_released.clear();
+                    self.input_state.clear();
                 }
 
                 if let Some(window) = &self.window {
@@ -87,19 +90,33 @@ impl ApplicationHandler for App {
                     surface_buffer.copy_from_slice(renderer.buf_as_slice());
                     surface_buffer.present().unwrap();
                 }
-            },
-            WindowEvent::KeyboardInput { device_id: _, event: keyboard_event, is_synthetic: _ } => {
+            }
+            WindowEvent::KeyboardInput {
+                device_id: _,
+                event: keyboard_event,
+                is_synthetic: _,
+            } => {
                 if let PhysicalKey::Code(key_code) = keyboard_event.physical_key {
                     match keyboard_event.state {
                         ElementState::Pressed => {
                             if keyboard_event.repeat == true {
                                 // info!("{:?} repeat!", key_code);
                             }
-                            self.input_state.keys_pressed.insert(key_code)
-                        },
-                        ElementState::Released => self.input_state.keys_released.insert(key_code),
+                            self.input_state.key_pressed(key_code)
+                        }
+                        ElementState::Released => self.input_state.key_released(key_code),
                     };
                 }
+            }
+            WindowEvent::MouseInput {
+                device_id: _,
+                state: mouse_state,
+                button: mouse_btn,
+            } => {
+                self.input_state.mouse_pressed = mouse_state.is_pressed();
+            },
+            WindowEvent::CursorMoved { device_id: _, position: pos } => {
+                self.input_state.mouse_pos = (pos.x, pos.y);
             }
             _ => {}
         }

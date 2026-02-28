@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+use std::collections::HashMap;
 use super::BLOCK_SIZE;
 use super::{COLORS, Shape};
 use crate::engine::ecs::component::{
@@ -97,10 +98,10 @@ impl Tetromino {
             world.set_parent(block.entity_id, self.entity_id);
         }
 
-        self.refresh_size(world);
+        // self.refresh_size(world);
     }
 
-    fn refresh_size(&mut self, world: &mut World) {
+    fn refresh_size(&mut self, world: &mut World) { // врахувати позицію блока. Чи потрібен тетроміно компонент Size взагалі?
         let mut width: usize = 0;
         let mut height: usize = 0;
 
@@ -185,7 +186,7 @@ impl Tetromino {
         {
             self.blocks.remove(idx);
             world.remove_entity(block_id);
-            self.refresh_size(world);
+            // self.refresh_size(world);
 
             Ok(())
         } else {
@@ -194,8 +195,26 @@ impl Tetromino {
     }
 
     pub fn rotate(&self, world: &mut World, rotate_direction: RotateDirection) {
-        let pos = world.fetch::<PositionComponent>(&self.entity_id).unwrap();
-        let rotation = world.fetch::<RotationComponent>(&self.entity_id).unwrap();
+        let mut pos: HashMap<EntityId, (i8, i8)> = HashMap::new();
+        let mut min_y: i8 = 0;
+        for block in &self.blocks {
+            let block_pos = world.fetch::<PositionComponent>(&block.get_id()).unwrap();
+            let new_y = block_pos.x as i8 * -1;
+            pos.insert(block.get_id(), (block_pos.y as i8, new_y));
+            if new_y < min_y {
+                min_y = new_y;
+            }
+        }
+        if min_y < 0 {
+            min_y *= -1;
+        }
+
+        for (entity_id, block_pos) in pos.iter_mut() {
+            block_pos.1 = block_pos.1 + min_y;
+            let pos = world.get_mut::<PositionComponent>(entity_id).unwrap();
+            pos.x = block_pos.0 as f32;
+            pos.y = block_pos.1 as f32;
+        }
     }
 
     /** Builder **/
